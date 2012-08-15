@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <shlwapi.h>
 
-#include "resource.h"
+#include "TrayRSSrc.h"
 
 #define TRAYRSS "TrayRSS"
 #define TRAYRSSCLASS "TrayRSSClass"

@@ -71,7 +71,7 @@
     <ClCompile Include="TrayRSS.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="resource.h" />
+    <ClInclude Include="TrayRSSrc.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TrayRSS.rc" />
