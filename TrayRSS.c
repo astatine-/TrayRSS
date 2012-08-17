@@ -3,12 +3,14 @@
 	Waits arounnd in the tray and periodically checks specified RSS feeds. 	
 	Shows baloon prompts when it finds new content
 	On a click, will open the related URL in the default browser
-	Based on USBVirusScan by Didier Stevents (https://DidierStevens.com)
+	Based on USBVirusScan by Didier Stevens (https://DidierStevens.com)
 	Source code put in public domain by Arun Tanksali, Creative Commons License
 	Use at your own risk
 
 	History:
 	15/07/2012: Start development
+	17/07/2012: Removed references to USB stuff
+	17/07/2012: Generalized Shell Notify, with version of Shell32 being detected dynamically
 */
 
 #define _WIN32_IE 0x0500
@@ -31,20 +33,28 @@
 #define SWM_EXIT		WM_APP + 2//	exit the program
 
 #define TRAY_ICON_ID	2110;
+#define PACKVERSION(major,minor) MAKELONG(minor,major)
+
 
 char szScanCommand[1024];
 char szAbout[1024];
 int iFlagHideConsole;
-int iFlagHideIcon;
+DWORD dwVer, dwTarget;
+DWORD nid_cbsize;
+
+
+
+
 
 // Function prototype
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-char FirstDriveFromMask (ULONG unitmask);
 void TrayIconAdd(HWND, HINSTANCE);
 void TrayIconBalloon(HWND, char *, char *, UINT, DWORD);
 void TrayIconDelete(HWND);
 void ShowContextMenu(HWND);
 VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired);
+DWORD GetShellVersion();
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nCmdShow)
 {
@@ -52,16 +62,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	HWND				hwndMain;			// Main window handle
 	HANDLE	hTimerQ, hTimer;
 	WNDCLASSEX	wcx;					// WINDOW class information	
-	HDEVNOTIFY	hDevnotify;
-	DEV_BROADCAST_DEVICEINTERFACE NotificationFilter;
 	char *pchIter;
 	int iParseState;
+	DLLVERSIONINFO dv;
 
 	// GUID generated on 28/09/2006 by Didier Stevens for this application: 2121fde7-4050-4ecf-9090-d9c357b1caf7
 	// Generate your own GUID when you repurpose this program
 	GUID FilterGUID = {0x2121fde7, 0x4050, 0x4ecf, {0x90, 0x90, 0xd9, 0xc3, 0x57, 0xb1, 0xca, 0xf7}};    		
 	
 	sprintf(szAbout, "%s v%s %s", TRAYRSS, VERSION, URL);
+
+		
 	
 	// Get command line
 	if (lpCmdLine[0] == '\0') {
@@ -76,8 +87,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	{
 		pchIter = lpCmdLine;
 		iParseState = 0;
-		iFlagHideIcon = 0;
 		iFlagHideConsole = 0;
+
 		do {
 			if (*pchIter == ' ' && iParseState == 0)
 			{
@@ -93,7 +104,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			else if (*pchIter == 'i' && (iParseState == 1 || iParseState == 2))
 			{
 				iParseState = 2;
-				iFlagHideIcon = 1;
 			}
 			else if (*pchIter == 'c' && (iParseState == 1 || iParseState == 2))
 			{
@@ -104,6 +114,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 		} while (*pchIter++ != '\0');
 		if (*pchIter != '\0')
 			strncpy (szScanCommand, pchIter, 1024);
+	}
+
+	dv.cbSize = sizeof(DLLVERSIONINFO);
+
+
+	dwVer = GetShellVersion();
+	dwTarget = PACKVERSION(6,0);
+
+	if(dwVer > dwTarget)
+	{
+		nid_cbsize = sizeof(NOTIFYICONDATA);
+	}
+	else
+	{
+		nid_cbsize = NOTIFYICONDATA_V3_SIZE; 
 	}
 
 	// Initialize the struct to zero
@@ -128,15 +153,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	// Create the window
 	hwndMain = CreateWindowEx(0,									// Extended window style
-														TRAYRSSCLASS,	// Window class name
-														"",									// Window title
-														WS_POPUP,						// Window style
-														0,0,								// (x,y) pos of the window
-														0,0,								// Width and height of the window
-														NULL,								// HWND of the parent window (can be null also)
-														NULL,								// Handle to menu
-														hInstance,					// Handle to application instance
-														NULL);							// Pointer to window creation data
+								TRAYRSSCLASS,	// Window class name
+								"",									// Window title
+								WS_POPUP,						// Window style
+								0,0,								// (x,y) pos of the window
+								0,0,								// Width and height of the window
+								NULL,								// HWND of the parent window (can be null also)
+								NULL,								// Handle to menu
+								hInstance,					// Handle to application instance
+								NULL);							// Pointer to window creation data
 
 	// Check if window creation was successful
 	if (!hwndMain)
@@ -145,26 +170,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Make the window invisible
 	ShowWindow(hwndMain, SW_HIDE);
 
-	// Initialize device class structure 
-  ZeroMemory(&NotificationFilter, sizeof(NotificationFilter));
-
-  NotificationFilter.dbcc_size = 0x20;
-  NotificationFilter.dbcc_devicetype = 5;			// DBT_DEVTYP_DEVICEINTERFACE;
-  NotificationFilter.dbcc_classguid = FilterGUID;
-    
-	// Register
-  hDevnotify = RegisterDeviceNotification(hwndMain, &NotificationFilter, DEVICE_NOTIFY_WINDOW_HANDLE);
-
-  if(hDevnotify == NULL)    
-		return 0;
-
-	if (!iFlagHideIcon)
-		TrayIconAdd(hwndMain, hInstance);
+	TrayIconAdd(hwndMain, hInstance);
 
 	hTimerQ = CreateTimerQueue();
-	if (!CreateTimerQueueTimer(&hTimer,hTimerQ,TimerRoutine,hwndMain,10000,30000,WT_EXECUTEDEFAULT)){
-		MessageBox(NULL,"Timer creation failed",szAbout,MB_OK);
+	if(hTimerQ){
+		if (!CreateTimerQueueTimer(&hTimer,hTimerQ,TimerRoutine,hwndMain,10000,30000,WT_EXECUTEDEFAULT)){
+			MessageBox(NULL,"Timer creation failed",szAbout,MB_OK);
+		}
+	} 
+	else {
+			MessageBox(NULL,"Timer Q creation failed",szAbout,MB_OK);
 	}
+	
 	
   // Process messages coming to this window
 	while (GetMessage(&msg, NULL, 0, 0)) {
@@ -180,9 +197,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	char chDrive;
-	PDEV_BROADCAST_VOLUME PdevVolume;
-  PDEV_BROADCAST_DEVICEINTERFACE PdevDEVICEINTERFACE;
   char szScan[1024];
   char szBalloon[128];
   STARTUPINFO s;
@@ -190,35 +204,6 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 	switch (msg)
 	{
-		case WM_DEVICECHANGE:
-			if (wParam == DBT_DEVICEARRIVAL)
-			{
-				// A device or piece of media has been inserted and is now available
-				PdevDEVICEINTERFACE = (PDEV_BROADCAST_DEVICEINTERFACE)lParam;
-        if (PdevDEVICEINTERFACE->dbcc_devicetype == DBT_DEVTYP_VOLUME)
-        {
-					PdevVolume = (PDEV_BROADCAST_VOLUME)lParam;
-					chDrive = FirstDriveFromMask(PdevVolume->dbcv_unitmask);
-					if (chDrive != '\0')
-					{
-						if (!iFlagHideIcon)
-						{
-							sprintf(szBalloon, "Drive %c: inserted.", chDrive);
-							TrayIconBalloon(hwnd, szBalloon, TRAYRSS, 5, NIIF_WARNING);
-						}
-						
-						sprintf(szScan, szScanCommand, chDrive);
-				    ZeroMemory(&s, sizeof(s));
-				    s.cb = sizeof(s);
-				    ZeroMemory(&p, sizeof(p));
-						CreateProcess(NULL, szScan, NULL, NULL, FALSE, iFlagHideConsole ? CREATE_NO_WINDOW : CREATE_NEW_CONSOLE, NULL, NULL, &s, &p);
-				    CloseHandle(p.hProcess);
-				    CloseHandle(p.hThread);
-					}
-        }
-      }
-      break;
-
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
@@ -235,9 +220,8 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		return 1;
 
     case WM_DESTROY:
-			if (!iFlagHideIcon)
     	  TrayIconDelete(hwnd);
-			PostQuitMessage(0);
+		   PostQuitMessage(0);
       break;
 
 		case SWM_TRAYMSG:
@@ -258,26 +242,15 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-char FirstDriveFromMask (ULONG unitmask)
-{
-	char chIter;
-	
-	for (chIter = 'A'; chIter <= 'Z'; chIter++)
-	  if (unitmask & 0x1)
-	  	return chIter;
-	  else
-	  	unitmask = unitmask >> 1;
-	
-	return '\0';
-}
-
 void TrayIconAdd(HWND hwnd, HINSTANCE hInstance)
 {
 	NOTIFYICONDATA nid;
 	char szTip[1024];
 
+
   ZeroMemory(&nid, sizeof(NOTIFYICONDATA));
-  nid.cbSize = sizeof(NOTIFYICONDATA);
+
+  nid.cbSize = nid_cbsize;
   nid.uID = TRAY_ICON_ID;
   nid.uFlags = NIF_ICON|NIF_MESSAGE|NIF_TIP;
   nid.hIcon = (HICON)LoadImage(hInstance, MAKEINTRESOURCE(IDI_MY_ICON), IMAGE_ICON, GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
@@ -295,7 +268,7 @@ void TrayIconBalloon(HWND hwnd, char *szMessage, char *szTitle, UINT uTimeout, D
 	NOTIFYICONDATA nid;
 
   ZeroMemory(&nid, sizeof(NOTIFYICONDATA));
-  nid.cbSize = sizeof(NOTIFYICONDATA);
+  nid.cbSize = nid_cbsize;
   nid.uID = TRAY_ICON_ID;
 	nid.uFlags = NIF_INFO;
   nid.hWnd = hwnd;
@@ -311,7 +284,7 @@ void TrayIconDelete(HWND hwnd)
 	NOTIFYICONDATA nid;
 
   ZeroMemory(&nid, sizeof(NOTIFYICONDATA));
-  nid.cbSize = sizeof(NOTIFYICONDATA);
+  nid.cbSize = nid_cbsize;
   nid.uID = TRAY_ICON_ID;
   nid.hWnd = hwnd;
   Shell_NotifyIcon(NIM_DELETE, &nid);
@@ -364,3 +337,42 @@ VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired)
 
 }
 
+DWORD GetShellVersion()
+{
+    HINSTANCE hinstDll;
+    DWORD dwVersion = 0;
+	LPCTSTR lpszDllName = "C:\\Windows\\System32\\Shell32.dll";
+
+    /* For security purposes, LoadLibrary should be provided with a fully qualified 
+       path to the DLL. The lpszDllName variable should be tested to ensure that it 
+       is a fully qualified path before it is used. */
+    hinstDll = LoadLibrary(lpszDllName);
+	
+    if(hinstDll)
+    {
+        DLLGETVERSIONPROC pDllGetVersion;
+        pDllGetVersion = (DLLGETVERSIONPROC)GetProcAddress(hinstDll, "DllGetVersion");
+
+        /* Because some DLLs might not implement this function, you must test for 
+           it explicitly. Depending on the particular DLL, the lack of a DllGetVersion 
+           function can be a useful indicator of the version. */
+
+        if(pDllGetVersion)
+        {
+            DLLVERSIONINFO dvi;
+            HRESULT hr;
+
+            ZeroMemory(&dvi, sizeof(dvi));
+            dvi.cbSize = sizeof(dvi);
+
+            hr = (*pDllGetVersion)(&dvi);
+
+            if(SUCCEEDED(hr))
+            {
+               dwVersion = PACKVERSION(dvi.dwMajorVersion, dvi.dwMinorVersion);
+            }
+        }
+        FreeLibrary(hinstDll);
+    }
+    return dwVersion;
+}
