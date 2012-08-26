@@ -70,6 +70,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="RSSFetch.c" />
+    <ClCompile Include="spec.c" />
     <ClCompile Include="TrayRSS.c" />
   </ItemGroup>
   <ItemGroup>
