@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svnroot/librss/!svn/ver/4/trunk/include
+END
+RSS_Feed.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/librss/!svn/ver/11/trunk/include/RSS_Feed.h
+END
+RSS_Html.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/librss/!svn/ver/11/trunk/include/RSS_Html.h
+END
+RSS_Node.h
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/librss/!svn/ver/7/trunk/include/RSS_Node.h
+END
+RSS_Stack.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/librss/!svn/ver/7/trunk/include/RSS_Stack.h
+END
+RSS_Buffer.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/librss/!svn/ver/11/trunk/include/RSS_Buffer.h
+END
+RSS_Parser.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/librss/!svn/ver/11/trunk/include/RSS_Parser.h
+END
+RSS_Date.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/librss/!svn/ver/11/trunk/include/RSS_Date.h
+END
+RSS_Item.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/librss/!svn/ver/11/trunk/include/RSS_Item.h
+END
+RSS_Http.h
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/librss/!svn/ver/11/trunk/include/RSS_Http.h
+END
+RSS.h
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svnroot/librss/!svn/ver/11/trunk/include/RSS.h
+END

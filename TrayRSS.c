@@ -15,6 +15,8 @@
 
 #define _WIN32_IE 0x0500
 
+#undef UNICODE
+
 #include <windows.h>
 #include <dbt.h>
 #include <direct.h>
@@ -22,6 +24,7 @@
 #include <shlwapi.h>
 
 #include "TrayRSSrc.h"
+#include "RSSFetch.h"
 
 #define TRAYRSS "TrayRSS"
 #define TRAYRSSCLASS "TrayRSSClass"
@@ -182,8 +185,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			MessageBox(NULL,"Timer Q creation failed",szAbout,MB_OK);
 	}
 	
-	
-  // Process messages coming to this window
+	  // Process messages coming to this window
 	while (GetMessage(&msg, NULL, 0, 0)) {
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
@@ -197,11 +199,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-  char szScan[1024];
-  char szBalloon[128];
-  STARTUPINFO s;
-  PROCESS_INFORMATION p;
-
 	switch (msg)
 	{
 	case WM_COMMAND:
@@ -324,7 +321,11 @@ VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired)
         //printf("Timer routine called. Parameter is %d.\n", 
         //        *(int*)lpParam);
 		sprintf(szBalloon, "Timer event signaled");
+		
 		TrayIconBalloon((HWND)lpParam, szBalloon, TRAYRSS, 5, NIIF_WARNING);
+
+		 wg(L"www.google.com");
+
         if(TimerOrWaitFired)
         {
             //printf("The wait timed out.\n");

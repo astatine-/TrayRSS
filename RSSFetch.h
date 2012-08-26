@@ -1,0 +1,1 @@
+int wg(char *);

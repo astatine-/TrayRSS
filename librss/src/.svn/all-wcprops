@@ -1,0 +1,59 @@
+K 25
+svn:wc:ra_dav:version-url
+V 36
+/svnroot/librss/!svn/ver/4/trunk/src
+END
+test.c
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/svnroot/librss/!svn/ver/11/trunk/src/test.c
+END
+RSS_Buffer.c
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnroot/librss/!svn/ver/11/trunk/src/RSS_Buffer.c
+END
+stress_test.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svnroot/librss/!svn/ver/4/trunk/src/stress_test.cpp
+END
+RSS_Parser.c
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/svnroot/librss/!svn/ver/11/trunk/src/RSS_Parser.c
+END
+RSS_Http.c
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svnroot/librss/!svn/ver/11/trunk/src/RSS_Http.c
+END
+RSS.c
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svnroot/librss/!svn/ver/11/trunk/src/RSS.c
+END
+RSS_Html.c
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svnroot/librss/!svn/ver/11/trunk/src/RSS_Html.c
+END
+RSS_Node.c
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svnroot/librss/!svn/ver/8/trunk/src/RSS_Node.c
+END
+RSS_Stack.c
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svnroot/librss/!svn/ver/7/trunk/src/RSS_Stack.c
+END
