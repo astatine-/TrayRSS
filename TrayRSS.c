@@ -13,7 +13,7 @@
 	17/07/2012: Generalized Shell Notify, with version of Shell32 being detected dynamically
 */
 
-#define _WIN32_IE 0x0500
+#define _WIN32_IE 0x0600
 
 #undef UNICODE
 
@@ -22,6 +22,8 @@
 #include <direct.h>
 #include <stdio.h>
 #include <shlwapi.h>
+#include <shellapi.h>
+
 
 #include "TrayRSSrc.h"
 #include "RSSFetch.h"
@@ -57,7 +59,7 @@ void TrayIconDelete(HWND);
 void ShowContextMenu(HWND);
 VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired);
 DWORD GetShellVersion();
-
+void LaunchBrowser(char *command);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, INT nCmdShow)
 {
@@ -199,6 +201,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	int i = 0;
+
 	switch (msg)
 	{
 	case WM_COMMAND:
@@ -221,7 +225,7 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		   PostQuitMessage(0);
       break;
 
-		case SWM_TRAYMSG:
+	case SWM_TRAYMSG:
 			switch(lParam)
 			{
 				case WM_LBUTTONDBLCLK:
@@ -229,6 +233,25 @@ LRESULT CALLBACK MainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				case WM_RBUTTONDOWN:
 				case WM_CONTEXTMENU:
 					ShowContextMenu(hwnd);
+					break;
+				case NIN_BALLOONSHOW:
+					i = 1;
+					break;
+				case NIN_BALLOONHIDE:
+					i = 2;
+					break;
+
+				case NIN_BALLOONTIMEOUT:
+					i = 3;
+					break;
+
+				case NIN_BALLOONUSERCLICK:{
+					i = 4;
+					LaunchBrowser("http://www.wired.com");
+					break;
+					}
+				default:
+					break;
 			}
         
 		default:
@@ -324,8 +347,6 @@ VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN TimerOrWaitFired)
 		
 		TrayIconBalloon((HWND)lpParam, szBalloon, TRAYRSS, 5, NIIF_WARNING);
 
-		 wg(L"www.google.com");
-
         if(TimerOrWaitFired)
         {
             //printf("The wait timed out.\n");
@@ -376,4 +397,9 @@ DWORD GetShellVersion()
         FreeLibrary(hinstDll);
     }
     return dwVersion;
+}
+
+void LaunchBrowser(char *command){
+
+	ShellExecute(NULL,"open",command,NULL,NULL,SW_SHOWNORMAL);
 }

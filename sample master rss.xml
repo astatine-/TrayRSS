@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+ <rss version="2.0">
+ <channel>
+ <title>TrayRSS Master feed</title>
+ <link>http://webdesign.about.com/rss2.0feed/</link>
+ <description>This contains the list of feeds to check, each as an item. </description>
+ 
+ <item>
+ <title>BBC</title>
+ <link>http://feeds.bbci.co.uk/news/rss.xml</link>
+ <description>BBC news stories live</description>
+ </item>
+
+ <item>
+ <title>NASA</title>
+ <link>http://www.nasa.gov/rss/breaking_news.rss</link>
+ <description>NASA breaking news</description>
+ </item>
+ 
+ <item>
+ <title>NDTV</title>
+ <link>http://feeds2.feedburner.com/NdtvNews-TopStories</link>
+ <description>NDTV breaking news</description>
+ </item>
+
+
+ </channel>
+ </rss>

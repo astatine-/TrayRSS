@@ -69,12 +69,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="RSSFetch.c" />
     <ClCompile Include="spec.c" />
     <ClCompile Include="TrayRSS.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RSSFetch.h" />
     <ClInclude Include="TrayRSSrc.h" />
   </ItemGroup>
   <ItemGroup>
