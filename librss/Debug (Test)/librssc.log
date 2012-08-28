@@ -1,2 +1,10 @@
 ﻿  test.c
+  RSS_Stack.c
+  RSS_Parser.c
+  RSS_Node.c
+  RSS_Http.c
+  RSS_Html.c
+  RSS_Buffer.c
+  RSS.c
+  Generating Code...
   librssc.vcxproj -> D:\Dev\TrayRSS\librss\Debug (Test)\librssc.exe

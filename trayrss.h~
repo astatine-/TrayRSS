@@ -1,0 +1,17 @@
+#ifndef __TRAYRSS_H__
+#define __TRAYRSS_H__
+
+#include <windows.h>
+#include <stdio.h>
+#include <shlwapi.h>
+#include <shellapi.h>
+
+#define TRAYRSS "TrayRSS"
+#define TRAYRSSCLASS "TrayRSSClass"
+#define URL "http://tanksali.com"
+#define VERSION "0.1"
+
+
+#define TRAYRSS_MASTER_RSS_URL "http://www.tanksali.com"
+
+#endif
